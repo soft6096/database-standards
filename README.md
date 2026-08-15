@@ -1,6 +1,9 @@
 # database-standards
 
-约束 AI 生成数据库代码质量的规范集。面向 MySQL，ORM 无关，适用任何技术栈（Java/Go/Node/Python）。
+约束 AI 生成数据库代码质量的规范集。面向 MySQL，两层结构：
+
+- **通用层** `standards/`：ORM 无关，适用任何技术栈（Java/Go/Node/Python）
+- **MyBatis-Plus 层** `mybatis-plus/`：Java 生态数据访问（Mapper/Wrapper/XML/分页插件）
 
 ## 解决的问题
 
@@ -17,6 +20,15 @@ AI 生成 SQL 常见问题：N+1 查询、SELECT *、索引失效写法、深分
 | [standards/pagination-standards.md](standards/pagination-standards.md) | 分页：深分页/键集分页/排序稳定 |
 | [standards/query-anti-patterns.md](standards/query-anti-patterns.md) | 查询反模式：N+1/超大 IN/join 膨胀/聚合 |
 | [standards/data-safety.md](standards/data-safety.md) | 数据安全：无 WHERE 写操作/备份/在线 DDL/时区 |
+| [mybatis-plus/mapper-standards.md](mybatis-plus/mapper-standards.md) | MyBatis-Plus Mapper：Wrapper/分页/逻辑删除/批量 |
+| [mybatis-plus/mybatis-xml-standards.md](mybatis-plus/mybatis-xml-standards.md) | MyBatis XML：resultMap/动态 SQL/foreach |
+| [mybatis-plus/pagination-example.md](mybatis-plus/pagination-example.md) | MyBatis 分页完整示例（插件 + 键集分页） |
+
+## 与 java-code-standards 的关系
+
+- **database-standards** = 数据库规范（本仓库，含 MyBatis-Plus 层）
+- **java-code-standards** = Java 代码规范（[GitHub](https://github.com/soft6096/java-code-standards)，Controller/Service/Entity 等 Java 类规范）
+- 写 MyBatis Mapper 接口：接口结构看 java-code-standards `01-java/mapper-standards.md`，数据访问规则看本仓库 `mybatis-plus/mapper-standards.md`
 
 ## 安装
 

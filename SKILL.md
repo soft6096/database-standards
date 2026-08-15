@@ -1,23 +1,29 @@
 ---
 name: database-standards
-description: 约束 AI 生成数据库代码质量的规范集（SQL/表设计/索引/分页/查询反模式/数据安全）。生成 SQL、建表 DDL、索引、分页查询、查询优化代码前必须加载；写 Mapper/DAO/Repository 层、审查慢查询时加载。触发场景：写 SQL、建表、设计索引、分页查询、N+1 排查、SQL 优化、DELETE/UPDATE 审查。
+description: 约束 AI 生成数据库代码质量的规范集（SQL/表设计/索引/分页/查询反模式/数据安全/MyBatis-Plus）。生成 SQL、建表 DDL、索引、分页查询、查询优化代码前必须加载；写 Mapper/DAO/Repository 层、MyBatis XML、审查慢查询时加载。触发场景：写 SQL、建表、设计索引、分页查询、N+1 排查、SQL 优化、DELETE/UPDATE 审查、写 MyBatis-Plus Mapper/XML。
 ---
 
 # Database Standards
 
-约束 AI 生成数据库代码（SQL / 表设计 / 索引 / 分页 / 查询）的规范集。面向 MySQL，ORM 无关，适用任何技术栈。
+约束 AI 生成数据库代码（SQL / 表设计 / 索引 / 分页 / 查询 / MyBatis-Plus）的规范集。面向 MySQL，两层结构：
+
+- **通用层**（`standards/`）：SQL/表设计/索引/分页/反模式/数据安全，ORM 无关，适用任何技术栈
+- **MyBatis-Plus 层**（`mybatis-plus/`）：Java 生态数据访问（Mapper/Wrapper/XML/分页插件），配合 java-code-standards 使用
 
 ## 加载矩阵
 
 | 任务类型 | 必读 | 建议读 |
 |---|---|---|
-| 写查询 SQL | `sql-standards.md` | `index-standards.md` / `query-anti-patterns.md` |
-| 建表 / 表结构 DDL | `table-design-standards.md` | `index-standards.md` |
-| 设计索引 | `index-standards.md` | `sql-standards.md` |
-| 分页查询 | `pagination-standards.md` | `index-standards.md` |
-| 写 DAO / Mapper / Repository | `query-anti-patterns.md` + `sql-standards.md` | `pagination-standards.md` |
-| 写 UPDATE / DELETE / DDL 变更 | `data-safety.md`（最高优先） | `table-design-standards.md` |
-| 优化慢查询 | `query-anti-patterns.md` + `index-standards.md` | `sql-standards.md` |
+| 写查询 SQL | `standards/sql-standards.md` | `standards/index-standards.md` / `standards/query-anti-patterns.md` |
+| 建表 / 表结构 DDL | `standards/table-design-standards.md` | `standards/index-standards.md` |
+| 设计索引 | `standards/index-standards.md` | `standards/sql-standards.md` |
+| 分页查询 | `standards/pagination-standards.md` | `standards/index-standards.md` |
+| 写 DAO / Mapper / Repository | `standards/query-anti-patterns.md` + `standards/sql-standards.md` | `standards/pagination-standards.md` |
+| 写 UPDATE / DELETE / DDL 变更 | `standards/data-safety.md`（最高优先） | `standards/table-design-standards.md` |
+| 优化慢查询 | `standards/query-anti-patterns.md` + `standards/index-standards.md` | `standards/sql-standards.md` |
+| 写 MyBatis-Plus Mapper | `mybatis-plus/mapper-standards.md` | `mybatis-plus/mybatis-xml-standards.md` |
+| 写 MyBatis XML | `mybatis-plus/mybatis-xml-standards.md` | `standards/sql-standards.md` / `standards/pagination-standards.md` |
+| MyBatis 分页实现 | `mybatis-plus/pagination-example.md` | `standards/pagination-standards.md` |
 
 ## 核心规则速查
 
@@ -37,6 +43,11 @@ description: 约束 AI 生成数据库代码质量的规范集（SQL/表设计/�
 ### 分页
 - 深分页用键集分页（id < lastId）；ORDER BY 加唯一字段兜底；pageSize 有上限
 
+### MyBatis-Plus
+- 简单条件用 LambdaWrapper，复杂 SQL 进 XML；禁止 `${}` 拼接值、禁止 apply()/last() 传用户输入
+- 分页用 `Page` + 插件（配 maxLimit），深分页改键集分页
+- 逻辑删除 `@TableLogic`；批量 500~1000 一批；禁 Map 返回主结果
+
 ## 使用要求
 
-生成任何 SQL/数据库代码前，按「任务类型 → 加载矩阵」读取规范；生成后对照对应规范「自检清单」逐项核对。违反强制规则即返工。写操作类 SQL（UPDATE/DELETE/DDL）必须过 `data-safety.md` 自检。
+生成任何 SQL/数据库代码前，按「任务类型 → 加载矩阵」读取规范；生成后对照对应规范「自检清单」逐项核对。违反强制规则即返工。写操作类 SQL（UPDATE/DELETE/DDL）必须过 `standards/data-safety.md` 自检。
