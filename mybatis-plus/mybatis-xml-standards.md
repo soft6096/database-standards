@@ -4,6 +4,23 @@
 
 编写 Mapper XML 映射文件、动态 SQL 时加载。
 
+## 触发条件（何时用 XML / 何时禁 XML，决策在前）
+
+**先判定，再决定是否建 XML。XML 是复杂 SQL 专用，不是每个 Mapper 必备：**
+
+| 查询类型 | 实现方式 | 是否建 XML |
+|---|---|---|
+| 单表简单查询（等值/范围/排序/分页） | `BaseMapper` + `LambdaQueryWrapper` | ❌ **禁止建 XML**（无谓维护成本） |
+| 单表复杂动态 SQL（多条件拼装） | `LambdaQueryWrapper` 条件拼接 | ❌ 优先 Wrapper，不建 XML |
+| 多表 join / 复杂子查询 / 聚合分组 | XML 或注解 SQL | ✅ 建 XML |
+| 复杂动态 SQL（`<foreach>`/`<choose>`/`<if>` 复杂拼装） | XML | ✅ 建 XML |
+| 批量操作（批量插入/更新优化） | XML `<foreach>` | ✅ 建 XML |
+| 特殊分页（分页 + join） | XML | ✅ 建 XML |
+
+- **禁止**：简单查询硬写 XML（`selectById` 自己写 SQL）；Controller/Service 不用 SQL，一律走 Mapper
+- **判定口诀**：`BaseMapper` 或 `LambdaQueryWrapper` 能表达的查询 → 不建 XML；需要手写 SQL 且带 join/动态/批量 → 建 XML
+- Mapper 接口可以不建 XML（无自定义复杂 SQL 时，接口只继承 `BaseMapper`，零文件）
+
 ## 强制规则
 
 ### 1. XML 结构
@@ -136,6 +153,7 @@
 
 ## 自检清单
 
+- [ ] 已判定触发条件：简单查询未建 XML（Wrapper 覆盖），复杂 SQL 已建 XML
 - [ ] namespace 与接口一致
 - [ ] XML 方法与接口方法一一对应
 - [ ] 无 SELECT *，列明确
