@@ -15,7 +15,7 @@
 @Mapper
 public interface OrderMapper extends BaseMapper<Order> {
 
-    Page<Order> selectOrderPage(Page<Order> page, @Param("query") OrderQueryDTO orderQuery);
+    Page<Order> selectOrderPage(Page<Order> pageResult, @Param("query") OrderQueryDTO orderQuery);
 }
 ```
 
@@ -55,7 +55,7 @@ new LambdaQueryWrapper<Order>()
 - 插件配置 `maxLimit` 防止一次性拉全表（见 pagination-example.md）
 
 ```java
-Page<Order> selectOrderPage(Page<Order> page, @Param("query") OrderQueryDTO orderQuery);
+Page<Order> selectOrderPage(Page<Order> pageResult, @Param("query") OrderQueryDTO orderQuery);
 ```
 
 - 深分页（offset 大）改键集分页，见 pagination-standards.md

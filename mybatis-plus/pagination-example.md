@@ -58,7 +58,7 @@ public class PageQuery {
 @Mapper
 public interface OrderMapper extends BaseMapper<Order> {
 
-    Page<Order> selectOrderPage(Page<Order> page, @Param("query") OrderQueryDTO orderQuery);
+    Page<Order> selectOrderPage(Page<Order> pageResult, @Param("query") OrderQueryDTO orderQuery);
 }
 ```
 
@@ -111,9 +111,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public PageResult<OrderVO> queryPage(OrderQueryDTO orderQuery) {
-        Page<Order> page = new Page<>(orderQuery.getPageNum(), orderQuery.getPageSize());
-        IPage<Order> result = orderMapper.selectOrderPage(page, orderQuery);
-        return PageResult.of(orderConverter.toVOList(result.getRecords()), result.getTotal());
+        Page<Order> pageResult = new Page<>(orderQuery.getPageNum(), orderQuery.getPageSize());
+        IPage<Order> pageQueryResult = orderMapper.selectOrderPage(pageResult, orderQuery);
+        return PageResult.of(orderConverter.toVOList(pageQueryResult.getRecords()), pageQueryResult.getTotal());
     }
 }
 ```
@@ -121,14 +121,14 @@ public class OrderServiceImpl implements OrderService {
 ```java
 @Data
 public class PageResult<T> {
-    private List<T> records;
+    private List<T> recordList;
     private long total;
 
-    public static <T> PageResult<T> of(List<T> records, long total) {
-        PageResult<T> result = new PageResult<>();
-        result.setRecords(records);
-        result.setTotal(total);
-        return result;
+    public static <T> PageResult<T> of(List<T> recordList, long total) {
+        PageResult<T> pageResult = new PageResult<>();
+        pageResult.setRecordList(recordList);
+        pageResult.setTotal(total);
+        return pageResult;
     }
 }
 ```
@@ -140,7 +140,7 @@ public class PageResult<T> {
 ```java
 public interface OrderMapper extends BaseMapper<Order> {
 
-    Page<Order> selectOrderPage(Page<Order> page, @Param("query") OrderQueryDTO orderQuery);
+    Page<Order> selectOrderPage(Page<Order> pageResult, @Param("query") OrderQueryDTO orderQuery);
 
     /** 键集分页：按 id 倒序，取小于 lastId 的数据 */
     List<Order> selectByCursor(@Param("query") OrderQueryDTO orderQuery,
@@ -167,8 +167,8 @@ public interface OrderMapper extends BaseMapper<Order> {
 ```java
 // Service：加载更多
 public List<OrderVO> queryByCursor(OrderQueryDTO orderQuery, Long lastId, int size) {
-    List<Order> records = orderMapper.selectByCursor(orderQuery, lastId, size);
-    return orderConverter.toVOList(records);
+    List<Order> orderRecordList = orderMapper.selectByCursor(orderQuery, lastId, size);
+    return orderConverter.toVOList(orderRecordList);
 }
 ```
 
