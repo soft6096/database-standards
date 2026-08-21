@@ -45,6 +45,29 @@ CREATE TABLE `t_order` (
 - 金额统一 `DECIMAL(10,2)` 或更大精度，注释单位（元/分）
 - 状态字段用 TINYINT/INT 存编码，注释每个值含义，不存中文
 
+### 3.5 建库/建表字符集：显式 utf8mb4
+
+建库建表**必须显式声明字符集与排序规则**，禁止依赖服务器默认（默认可能不是 utf8mb4）：
+
+```sql
+CREATE DATABASE `app` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+CREATE TABLE `t_order` (
+    ...
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单表';
+```
+
+- MySQL 8 服务器默认字符集即 utf8mb4，但显式声明防止部署环境差异（老实例默认 latin1/utf8mb3 时中文/emoji 乱码）
+- 排序规则统一 `utf8mb4_general_ci` 或 `utf8mb4_0900_ai_ci`（MySQL 8 默认），全库一致，避免 JOIN 排序规则冲突
+- 连接侧字符集（JDBC URL）见 java-code-standards `application-config-standards.md`：**不要在 URL 写 `characterEncoding=utf8mb4`**（Connector/J 8.x 报 Unsupported character encoding）
+
+### 3.6 表结构与代码一致性（schema 与 Entity 强一致）
+
+- **Entity 与 DDL 一一对应**：字段增减必须同时改 Entity + schema/迁移脚本，禁止只改一边——只改 Entity 报 `Unknown column 'xxx'`，只改 DDL 报实体字段不存在
+- **初始化/重建库必须用当前 schema 全量重建**，禁止沿用旧库旧表：库里遗留旧版表（如旧列 `nickname` 新代码用 `real_name`）时，删除旧库按当前 schema.sql 重建，而不是手工补列
+- schema.sql（或迁移脚本全集）与代码同仓维护、随版本演进；存量库表结构与代码不匹配时，先对齐 schema 再谈运行
+- 表结构变更走迁移脚本（ALTER 追加），禁止直接改线上库；schema 文件与迁移脚本双轨并存时，以脚本全集为准
+
 ### 4. 字段约束
 
 - 所有字段 `NOT NULL` + 默认值；必须可空时显式 DEFAULT NULL 并注释原因
@@ -89,6 +112,9 @@ CREATE TABLE `order` (
 - [ ] 金额 DECIMAL，无 FLOAT/DOUBLE
 - [ ] 时间 DATETIME
 - [ ] 全字段 NOT NULL + 默认值
-- [ ] utf8mb4，全字段 COMMENT
+- [ ] 建库建表显式 utf8mb4 + 排序规则（不依赖服务器默认）
+- [ ] 全字段 COMMENT
 - [ ] 无 col1/col2 无意义字段
 - [ ] DDL 进版本管理
+- [ ] Entity 与 DDL 一一对应（字段增减双同步）
+- [ ] 初始化/重建库按当前 schema 全量重建，无旧库旧表遗留
