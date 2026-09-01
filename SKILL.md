@@ -44,7 +44,7 @@ description: 约束 AI 生成数据库代码质量的规范集（SQL/表设计/�
 - 深分页用键集分页（id < lastId）；ORDER BY 加唯一字段兜底；pageSize 有上限
 
 ### MyBatis-Plus
-- 简单条件用 LambdaWrapper，复杂 SQL 进 XML；禁止 `${}` 拼接值、禁止 apply()/last() 传用户输入
+- 简单条件用 LambdaWrapper，复杂 SQL 进 XML；**禁止注解 SQL**（`@Select`/`@Insert`/`@Update`/`@Delete`/`<script>`，手写 SQL 一律 XML）；禁止 `${}` 拼接值、禁止 apply()/last() 传用户输入
 - 分页用 `Page` + 插件（配 maxLimit），深分页改键集分页
 - 逻辑删除 `@TableLogic`；批量 500~1000 一批；禁 Map 返回主结果
 

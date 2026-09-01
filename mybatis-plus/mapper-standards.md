@@ -25,10 +25,11 @@ public interface OrderMapper extends BaseMapper<Order> {
 |---|---|
 | 单表简单条件 | LambdaQueryWrapper / LambdaUpdateWrapper |
 | 复杂查询（多表 join、子查询、动态条件多） | XML（见 mybatis-xml-standards.md） |
-| 批量插入/更新 | XML `<foreach>` 或注解脚本 |
+| 批量插入/更新 | XML `<foreach>` |
 
 - 简单单表查询禁止写死 SQL 字符串，用 Wrapper 避免 SQL 注入与硬编码字段
-- 动态 SQL（`<if>`）统一放 XML，注解内长脚本可读性差
+- **禁止注解 SQL**（`@Select`/`@Insert`/`@Update`/`@Delete`/`<script>`）：需要手写 SQL 一律放 `resources/mapper/XxxMapper.xml`，接口只声明方法签名——注解 SQL 散落 Java 代码无法统一审计/格式化/复用
+- 动态 SQL（`<if>`）统一放 XML
 
 ### 3. Wrapper 使用规范
 
@@ -77,6 +78,7 @@ Page<Order> selectOrderPage(Page<Order> pageResult, @Param("query") OrderQueryDT
 
 ### 8. 禁止事项
 
+- ❌ **注解 SQL**（`@Select`/`@Insert`/`@Update`/`@Delete`/`<script>`）——手写 SQL 一律放 XML，禁止写在接口方法上
 - ❌ 返回 `Map<String, Object>` 作为主结果（类型不安全），用 VO/DTO 接收
 - ❌ `select *`（XML 内），明确列出列
 - ❌ 在 Mapper 里写业务逻辑（if 状态判断等）
@@ -85,14 +87,27 @@ Page<Order> selectOrderPage(Page<Order> pageResult, @Param("query") OrderQueryDT
 ## 反例 / 正例
 
 ```java
-// 反例
+// 反例：注解 SQL 写在 Java 方法上（禁）——SQL 散落代码中，无法统一审计/复用
 @Select("SELECT * FROM t_order WHERE status = #{0} AND shop_id = #{1}")
 List<Order> list(Integer status, Long shopId);
 
-// 正例（简单条件用 Wrapper，Service 层组装）
+// 正例 1（简单条件用 Wrapper，Service 层组装，无 XML 文件）
 List<Order> list = orderMapper.selectList(new LambdaQueryWrapper<Order>()
         .eq(Order::getStatus, status)
         .eq(Order::getShopId, shopId));
+
+// 正例 2（复杂 SQL 进 XML，接口只声明方法签名）
+List<OrderVO> selectOrderVOList(@Param("status") Integer status,
+                                @Param("shopId") Long shopId);
+```
+
+```xml
+<!-- resources/mapper/OrderMapper.xml -->
+<select id="selectOrderVOList" resultType="com.example.order.vo.OrderVO">
+    SELECT id, order_no, status
+    FROM t_order
+    WHERE status = #{status} AND shop_id = #{shopId}
+</select>
 ```
 
 ## 性能优化建议
@@ -104,7 +119,7 @@ List<Order> list = orderMapper.selectList(new LambdaQueryWrapper<Order>()
 ## 自检清单
 
 - [ ] 继承 BaseMapper，无重复通用 CRUD 定义
-- [ ] 复杂 SQL 在 XML，简单条件用 Wrapper
+- [ ] 复杂 SQL 在 XML，简单条件用 Wrapper；无注解 SQL（@Select/@Insert/@Update/@Delete/<script>）
 - [ ] Wrapper 用 Lambda 版，无字符串列名
 - [ ] 无 apply()/last() 拼接用户输入
 - [ ] 分页用 Page 参数，插件配 maxLimit
