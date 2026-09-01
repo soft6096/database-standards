@@ -13,6 +13,8 @@
 - 表名与列名显式 `t_alias.column` 限定，多表 join 必带别名
 
 ```sql
+-- 用途：按用户+状态查订单列表（列表页）；归属：OrderMapper.selectOrderList
+-- 参数：userId 用户ID、status 订单状态；条件：join 用户表取昵称
 SELECT o.id, o.order_no, o.amount, u.nickname
 FROM t_order o
 JOIN t_user u ON u.id = o.user_id
@@ -21,6 +23,28 @@ WHERE o.user_id = #{userId}
 ORDER BY o.create_time DESC
 LIMIT #{limit}
 ```
+
+### 1.5 SQL 注释（强制，一条不漏）
+
+- **所有 SQL 语句必须带注释**：建表 DDL、DML、查询 SQL 全覆盖，禁止无注释裸 SQL
+- **建表 DDL**：每个字段 `COMMENT '...'`（含义 + 枚举取值/单位/时区约定）+ 表级 `COMMENT='...'`（见 table-design-standards）
+- **查询/DML SQL**：语句上方 `--` 注释，必含 ① 用途 ② 归属 Mapper 函数（如 `OrderMapper.selectTimeoutOrders`）③ 关键条件/参数说明；多行语句每段条件可再行内注释
+
+```sql
+-- 用途：筛选超时未支付订单（Job 超时关闭）；归属：OrderMapper.selectTimeoutOrders
+-- 参数：minutes 超时分钟、limit 批处理上限；条件：PENDING + 超时 + 未删除
+SELECT order_id FROM sys_order
+WHERE status = 'PENDING'
+  AND create_time < DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+  AND del_flag = '0'
+ORDER BY create_time ASC
+LIMIT #{limit}
+
+-- 用途：初始化订单状态字典（幂等：同 dict_type 跳过）
+INSERT INTO sys_dict_type (dict_name, dict_type, status) VALUES ('订单状态', 'order_status', '0');
+```
+
+- SQL 注释与代码注释同源（见 comment-standards）：注释写业务含义，禁止只翻译 SQL 关键字；技术方案中的 SQL 同样适用（见 ai-dev-workflow 3.0 模板"SQL 全量注释"）
 
 ### 2. WHERE 条件规范
 
@@ -108,3 +132,4 @@ LIMIT #{pageSize}
 - [ ] UPDATE/DELETE 有 WHERE
 - [ ] EXPLAIN 验证关键查询
 - [ ] 无深分页
+- [ ] 所有 SQL 带注释（查询/DML 每条 `--` 用途+归属+条件；DDL 每列 COMMENT）
