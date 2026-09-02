@@ -1,6 +1,6 @@
 ---
 name: database-standards
-description: 约束 AI 生成数据库代码质量的规范集（SQL/表设计/索引/分页/查询反模式/数据安全/MyBatis-Plus）。生成 SQL、建表 DDL、索引、分页查询、查询优化代码前必须加载；写 Mapper/DAO/Repository 层、MyBatis XML、审查慢查询时加载。触发场景：写 SQL、建表、设计索引、分页查询、N+1 排查、SQL 优化、DELETE/UPDATE 审查、写 MyBatis-Plus Mapper/XML。
+description: 约束 AI 生成数据库代码质量的规范集（SQL/表设计/索引/分页/查询反模式/数据安全/MyBatis-Plus）。生成 SQL、建表 DDL、索引、分页查询、查询优化代码前必须加载；写 Mapper/DAO/Repository 层、MyBatis XML、审查慢查询时加载。触发场景：写 SQL、建表、设计索引、分页查询、N+1 排查、SQL 优化、DELETE/UPDATE 审查、写 MyBatis-Plus Mapper/XML。代码生成完成后的 SQL 兜底核对见 check-standards skill（HIGH #3 SQL 在 XML / #4 SQL 注释 / #5 DDL 注释 / #8 SQL 注入 / #9 UPDATE-DELETE 带 WHERE）。
 ---
 
 # Database Standards
