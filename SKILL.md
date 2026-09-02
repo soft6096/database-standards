@@ -1,6 +1,6 @@
 ---
 name: database-standards
-description: 约束 AI 生成数据库代码质量的规范集（SQL/表设计/索引/分页/查询反模式/数据安全/MyBatis-Plus）。生成 SQL、建表 DDL、索引、分页查询、查询优化代码前必须加载；写 Mapper/DAO/Repository 层、MyBatis XML、审查慢查询时加载。触发场景：写 SQL、建表、设计索引、分页查询、N+1 排查、SQL 优化、DELETE/UPDATE 审查、写 MyBatis-Plus Mapper/XML。WHEN NOT（不要因这些场景触发本 skill）：Java 类结构/命名/分层/日志/事务规则 → java-code-standards；Java 代码注释（非 SQL 语句内的注释）→ comment-standards；纯 Java 代码生成（不含 SQL/表/数据访问）→ 只加载 java-code-standards，本 skill 不重复定义。代码生成完成后的 SQL 兜底核对见 check-standards skill（SQL 在 XML / SQL 注释 / DDL 注释 / SQL 注入 / UPDATE-DELETE 带 WHERE 等核对项）。
+description: 约束 AI 生成数据库代码质量的规范集（SQL/表设计/索引/分页/查询反模式/数据安全/MyBatis-Plus）。**只要产出/修改 SQL、DDL、索引或数据访问代码就必须加载本 skill——包括不走完整开发流程的零散请求（"写个 SQL"/"建张表"/"这个查询怎么优化"）：任何 SQL/建表/数据访问产物在返回用户前，本 skill 都必须已加载**；生成 SQL、建表 DDL、索引、分页查询、查询优化代码前必须加载；写 Mapper/DAO/Repository 层、MyBatis XML、审查慢查询时加载。触发场景：写 SQL、建表、设计索引、分页查询、N+1 排查、SQL 优化、DELETE/UPDATE 审查、写 MyBatis-Plus Mapper/XML、**没有需求文档/不走流程的直接 SQL 请求**。WHEN NOT（不要因这些场景触发本 skill）：Java 类结构/命名/分层/日志/事务规则 → java-code-standards；Java 代码注释（非 SQL 语句内的注释）→ comment-standards；纯 Java 代码生成（不含 SQL/表/数据访问）→ 只加载 java-code-standards，本 skill 不重复定义。代码生成完成后的 SQL 兜底核对见 check-standards skill（SQL 在 XML / SQL 注释 / DDL 注释 / SQL 注入 / UPDATE-DELETE 带 WHERE 等核对项）。
 ---
 
 # Database Standards
