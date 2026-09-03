@@ -65,6 +65,7 @@ CREATE TABLE `t_order` (
 ### 3.6 表结构与代码一致性（schema 与 Entity 强一致）
 
 - **Entity 与 DDL 一一对应**：字段增减必须同时改 Entity + schema/迁移脚本，禁止只改一边——只改 Entity 报 `Unknown column 'xxx'`，只改 DDL 报实体字段不存在
+- **一张表只允许一个 Entity 映射**（同表唯一映射）：新建 Entity 前先 `grep '@TableName("表名")'` 全项目查重——同表已有 Entity 则复用/扩展，**禁止再造第二个映射同表的 Entity**（后台/前台/各模块各建一个都是重复映射，双维护必漂移，见 java-code-standards `01-java/entity-standards.md` §1）
 - **初始化/重建库必须用当前 schema 全量重建**，禁止沿用旧库旧表：库里遗留旧版表（如旧列 `nickname` 新代码用 `real_name`）时，删除旧库按当前 schema.sql 重建，而不是手工补列
 - schema.sql（或迁移脚本全集）与代码同仓维护、随版本演进；存量库表结构与代码不匹配时，先对齐 schema 再谈运行
 - 表结构变更走迁移脚本（ALTER 追加），禁止直接改线上库；schema 文件与迁移脚本双轨并存时，以脚本全集为准
